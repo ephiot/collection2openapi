@@ -14,18 +14,35 @@ $ yarn install
 Usage: index [options]
 
 Options:
-  -v, --version                    output the version number
-  -c, --collection <filepath>      [REQUIRED] Postman collection JSON filepath
-  -e, --environment <filepath>     Postman environment JSON filepath
-  -g, --globals <filepath>         Postman globals JSON filepath
-  -o, --options-output <filepath>  Options output filepath (default: "./output options_1640721864653.json")
-  -r, --result <filepath>          OpenAPI JSON output filepath (default:
-                                   "./output/openapi_1640721864653.json")
-  -h, --help                       display help for command
+  -v, --version                               output the version number
+  -t, --type <type>                           [REQUIRED] Collection type: 'postman', 'insomnia'
+  -c, --collection <filepath>                 [REQUIRED] Postman/Insomnia v4 collection JSON filepath
+  -o, --output <filepath>                     OpenAPI JSON output filepath (default: "./output/{type}_openapi_1656620932435.json")
+  -so, --save-options <filepath>              Options output filepath (default: "./output/{type}_options_1656620932435.json")
+  
+  Postman related:
+  -pe, --postman-environment <filepath>       Postman environment JSON filepath
+  -pg, --postman-globals <filepath>           Postman globals JSON filepath
+  
+  Insomnia related:
+  -io, --insomnia-options <filepath>          Insomnia JSON filepath
+  OR
+  -iot, --insomnia-option-title <title>       Insomnia option: title
+  -iod, --insomnia-option-desc <description>  Insomnia option: description
+  -iov, --insomnia-option-vers <version>      Insomnia option: version
+  -iob, --insomnia-option-baseurl <base url>  Insomnia option: base URL
+   
+  -h, --help                                  display help for command
 ```
 
 Example:
 
+Postman collections to OpenAPI:
 ```bash
-$ node index,js -c [path to collection.json] -e [path to environment.json] -g [path to globals.json] -o [path to output options JSON (for debug)] -r [path to output OpenAPI JSON as result]
+$ node index.js -t postman -c [path to collection.json] -pe [path to environment.json] -pg [path to globals.json] -so [path to output options JSON (for debug)] -o [path to output OpenAPI JSON as result]
+```
+
+Insomnia collections to OpenAPI:
+```bash
+$ node index.js -t insomnia -c [path to collection.json] -io [path to insomnia options json] -so [path to output options JSON (for debug)] -o [path to output OpenAPI JSON as result]
 ```
