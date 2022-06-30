@@ -1,6 +1,12 @@
-# postman-openapi-converter
+# collection2openapi
 
-This app uses postman-to-openapi(https://joolfe.github.io/postman-to-openapi/) convert Postman collection + environment + globals into OpenAPI JSON (for use with swagger AppScan for example).
+This app is an API collection converter for OpenAPI specification, the purpouse of this project is to use one solution for many cases.
+
+Currently it only supports Postman and Insomnia (V4) collections format.
+
+This app uses postman-to-openapi (https://joolfe.github.io/postman-to-openapi/) to convert Postman collection + environment + globals into OpenAPI JSON (for use with swagger AppScan for example).
+
+This app uses insomnia-oas-converter (https://github.com/codeasashu/insomnia-oas-converter) to convert Insomnia collection V4 into OpenAPI JSON (for use with swagger AppScan for example).
 
 ## Installation
 
@@ -46,3 +52,8 @@ Insomnia collections to OpenAPI:
 ```bash
 $ node index.js -t insomnia -c [path to collection.json] -io [path to insomnia options json] -so [path to output options JSON (for debug)] -o [path to output OpenAPI JSON as result]
 ```
+
+## TODO:
+- Better architecture
+- Extract convertion logic to modules (for future expansions, e.g. another format to convert)
+- Release as a NPM package
