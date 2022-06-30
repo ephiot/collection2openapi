@@ -4,6 +4,7 @@
   "packageManager": "yarn@3.1.1",
   "dependencies": {
     "commander": "^8.3.0",
+    "insomnia-oas-converter": "codeasashu/insomnia-oas-converter#fix-example",
     "postman-to-openapi": "^2.0.0"
   },
   "version": "1.0.0"

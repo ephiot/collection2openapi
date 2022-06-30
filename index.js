@@ -3,66 +3,38 @@ const path = require('path')
 const pkg = require(path.join(__dirname, 'package.json'));
 const prog = require('commander')
 const postmanToOpenApi = require('postman-to-openapi')
-
-// Setting program args/options
-prog
-.version(pkg.version || '0.0.0', '-v, --version')
-.option('-c, --collection <filepath>', '[REQUIRED] Postman collection JSON filepath')
-.option('-e, --environment <filepath>', 'Postman environment JSON filepath')
-.option('-g, --globals <filepath>', 'Postman globals JSON filepath')
-.option('-o, --options-output <filepath>', 'Options output filepath', `./output/options_${Date.now()}.json`)
-.option('-r, --result <filepath>', 'OpenAPI JSON output filepath', `./output/openapi_${Date.now()}.json`)
-.parse(process.argv);
-
-const fileCollection = prog.opts().collection
-const fileEnvironment = prog.opts().environment
-const fileGlobals = prog.opts().globals
-const optionsFilepath = prog.opts().optionsFilepath
-const openApiFilepath = prog.opts().result
-
-if (fileCollection === undefined) {
-    console.error('No collection (Use --help for more details).')
-    return false
-}
-
-var options = {
-    "additionalVars": {}
-}
+const insomniaToOpenApi = require('insomnia-oas-converter').default
 
 /**
- * Read a Postman environment/globals vars exported JSON and set on options
- * @param String filepath Exported JSON filepath
- * @returns Object options
+ * Supported Types
  */
-const setAdditionVarsFromJson = (filepath) => {
+const TYPE_POSTMAN = 'postman'
+const TYPE_INSOMNIA = 'insomnia'
+const TYPES_SUPPORTED = [TYPE_POSTMAN, TYPE_INSOMNIA]
+
+/**
+ * Read a file
+ * @param String filepath filepath
+ * @returns mixed|bool file contents or false
+ */
+ const loadFile = (filepath) => {
     try {
-        const data = fs.readFileSync(filepath, 'utf8')
-    
-        // parse JSON string to JSON object
-        JSON.parse(data).values.forEach((item) => {
-            options.additionalVars[item.key] = item.value
-        });
+        return fs.readFileSync(filepath, 'utf8')
     } catch (err) {
-        console.log(`[${fileEnvironment}] Error reading file from disk: ${err}`);
+        console.log(`[${filepath}] Error reading file from disk: ${err}`);
+        return false
     }
-    return options
 }
 
 /**
- * Save options JSON file on output filepath
+ * Save a file
  * @param String output Output filepath
- * @param Object data Additional vars object
+ * @param mixed contents File contents
  * @returns bool
  */
-const saveOptionsFile = (output, data) => {
+const saveFile = (output, contents) => {
     try {
-
-        // convert JSON object to a string
-        const contents = JSON.stringify(data, null, 4);
-
-        // write file to disk
         fs.writeFileSync(output, contents, 'utf8');
-
         console.log(`[${output}] File is written successfully!`);
         return true
     } catch (err) {
@@ -71,24 +43,149 @@ const saveOptionsFile = (output, data) => {
     }    
 }
 
-// Get key:value from environment file
-if (fileEnvironment !== undefined) {
-    options = setAdditionVarsFromJson(fileEnvironment)
-}
-// Get key:value from globals file
-if (fileGlobals !== undefined) {
-    options = setAdditionVarsFromJson(fileGlobals)
-}
-// Save additional variables file
-if (optionsFilepath !== undefined) {
-    saveOptionsFile(optionsFilepath, options)
+/**
+ * Read a JSON file
+ * @param String filepath filepath
+ * @returns object JSON
+ */
+const loadJson = (filepath) => {
+    try {
+        return JSON.parse(loadFile(filepath))
+    } catch (err) {
+        console.log(`[${filepath}] Error parsing JSON file: ${err}`);
+        return false
+    }
 }
 
-// Convert Postman (collection + environment + globals) into Openapi JSON
-postmanToOpenApi(fileCollection, openApiFilepath, options)
-    .then(result => {
-        console.log(`File output: ${openApiFilepath}`,`OpenAPI specs: ${result}`)
-    })
-    .catch(err => {
-        console.log(err)
-    })
+/**
+ * POSTMAN related stuff
+ */
+
+var postmanOptions = {
+    "additionalVars": {}
+}
+
+/**
+ * Read a Postman environment/globals vars exported JSON and set on options
+ * @param String filepath Exported JSON filepath
+ * @returns Object options
+ */
+ const setPostmanAdditionVarsFromJson = (filepath, options) => {
+    try {
+        const data = loadJson(filepath)
+    
+        // Add vars
+        data.values.forEach((item) => {
+            options.additionalVars[item.key] = item.value
+        });
+    } catch (err) {
+        console.log(`[${fileEnvironment}] Error reading JSON file: ${err}`);
+    }
+    return options
+}
+
+/**
+ * INSOMNIA related stuff
+ */
+
+var insomniaOptions = {
+    "title": "My Api",
+    "description": "A Very cool api",
+    "version": "1.0.0",
+    "baseUrl": "http://example.tld"
+}
+
+/**
+ * Read a Postman environment/globals vars exported JSON and set on options
+ * @param String filepath Exported JSON filepath
+ * @returns Object options
+ */
+const setInsomniaOptionsFromJson = (filepath, options) => {
+    try {
+        const data = loadJson(filepath)
+    
+        // Add vars
+        data.values.forEach((item) => {
+            options[item.key] = item.value
+        });
+    } catch (err) {
+        console.log(`[${fileEnvironment}] Error reading JSON file: ${err}`);
+    }
+    return options
+}
+
+/**
+ * Execution
+ */
+
+// Setting program args/options
+prog
+.version(pkg.version || '0.0.0', '-v, --version')
+.option('-t, --type <type>', '[REQUIRED] Collection type: \'postman\', \'insomnia\'')
+.option('-c, --collection <filepath>', '[REQUIRED] Postman/Insomnia v4 collection JSON filepath')
+.option('-o, --output <filepath>', 'OpenAPI JSON output filepath', `./output/{type}_openapi_${Date.now()}.json`)
+.option('-so, --save-options <filepath>', 'Options output filepath', `./output/{type}_options_${Date.now()}.json`)
+.option("\nPostman related:\n")
+.option('-pe, --postman-environment <filepath>', 'Postman environment JSON filepath')
+.option('-pg, --postman-globals <filepath>', 'Postman globals JSON filepath')
+.option("\nInsomnia related:\n")
+.option('-io, --insomnia-options <filepath>', 'Insomnia JSON filepath')
+.parse(process.argv);
+
+// Core
+const collectionType = prog.opts().type
+const collectionFile = prog.opts().collection
+if (TYPES_SUPPORTED.indexOf(collectionType) < 0 || collectionFile === undefined) {
+    console.error('No collection or invalid type (Use --help for more details).')
+    return false
+}
+const outputFilepath = prog.opts().output.replace('{type}', collectionType)
+const optionsFilepath = prog.opts().saveOptions.replace('{type}', collectionType)
+// Postman
+const postmanEnv = prog.opts().postmanEnvironment
+const postmanGlobals = prog.opts().postmanGlobals
+// Insomnia
+const insomniaOptionsFile = prog.opts().insomniaOptions
+
+// Postman
+if (collectionType === TYPE_POSTMAN) {
+    // Get key:value from environment file
+    if (postmanEnv !== undefined) {
+        postmanOptions = setPostmanAdditionVarsFromJson(postmanEnv)
+    }
+    // Get key:value from globals file
+    if (postmanGlobals !== undefined) {
+        postmanOptions = setPostmanAdditionVarsFromJson(postmanGlobals)
+    }
+    // Save additional variables file
+    if (optionsFilepath !== undefined) {
+        saveFile(optionsFilepath, JSON.stringify(postmanOptions))
+    }
+    // Convert Postman (collection + environment + globals) into Openapi JSON
+    return postmanToOpenApi(collectionFile, outputFilepath, postmanOptions)
+            .then(result => {
+                console.log(`File output: ${outputFilepath}`,`OpenAPI specs: ${result}`)
+            })
+            .catch(err => {
+                console.log(err)
+            })
+}
+
+// Insomnia
+if (collectionType === TYPE_INSOMNIA) {
+    // Get key:value from environment file
+    if (insomniaOptionsFile !== undefined) {
+        insomniaOptions = setInsomniaOptionsFromJson(insomniaOptionsFile)
+    }
+    // Save additional variables file
+    if (optionsFilepath !== undefined) {
+        saveFile(optionsFilepath, JSON.stringify(insomniaOptions))
+    }
+    // Convert Insomnia (collection) into Openapi JSON
+    const collection = loadJson(collectionFile)
+    const result = (new insomniaToOpenApi(collection, insomniaOptions)).convert().as_json()
+    return saveFile(outputFilepath, result)
+}
+
+// If, for some reason, no type was matched
+console.error(`[${collectionType}] No type was matched.`)
