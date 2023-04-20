@@ -60,10 +60,20 @@ js-yaml@^4.1.0:
   dependencies:
     argparse "^2.0.1"
 
-marked@^4.0.8:
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.8.tgz#ef127626ac65786460f9420d57cc8d5ffdcacbed"
-  integrity sha512-dkpJMIlJpc833hbjjg8jraw1t51e/eKDoG8TFOgc5O0Z77zaYKigYekTDop5AplRoKFGIaoazhYEhGkMtU3IeA==
+jsonc-parser@3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/jsonc-parser/-/jsonc-parser-3.2.0.tgz#31ff3f4c2b9793f89c67212627c51c6394f88e76"
+  integrity sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==
+
+lodash.camelcase@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
+  integrity sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==
+
+marked@^4.2.5:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-4.3.0.tgz#796362821b019f734054582038b116481b456cf3"
+  integrity sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==
 
 mustache@^4.2.0:
   version "4.2.0"
@@ -75,14 +85,16 @@ openapi3-ts@^1.4.0:
   resolved "https://registry.yarnpkg.com/openapi3-ts/-/openapi3-ts-1.4.0.tgz#679d5a24be0efc36f5de4fc2c4b8513663e16f65"
   integrity sha512-8DmE2oKayvSkIR3XSZ4+pRliBsx19bSNeIzkTPswY8r4wvjX86bMxsORdqwAwMxE8PefOcSAT2auvi/0TZe9yA==
 
-postman-to-openapi@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/postman-to-openapi/-/postman-to-openapi-2.0.0.tgz#9eee6e4ecacee1783862d1e0744dd979401ca398"
-  integrity sha512-CESFOaM6tiSDjOeUFkjo+aTx0rzB2vjp8GcmyPSgDSt6bFrh18vzWz9kOGYVFdFMDAVMGA/kdvPhiE8qctkggQ==
+postman-to-openapi@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/postman-to-openapi/-/postman-to-openapi-3.0.1.tgz#3287e756f4d36489e3c43e99ef799618246e2aed"
+  integrity sha512-OUenC7fi5moe41nhO0yUj8jqVj6tchLCjPxG2d28Ai//Oujt3lL7tiFCL2P6pKUV1a7p5X/BJh7op65jjbrs3Q==
   dependencies:
     commander "^8.3.0"
     js-yaml "^4.1.0"
-    marked "^4.0.8"
+    jsonc-parser "3.2.0"
+    lodash.camelcase "^4.3.0"
+    marked "^4.2.5"
     mustache "^4.2.0"
 
 sprintf-js@~1.0.2:

@@ -5,7 +5,7 @@
   "dependencies": {
     "commander": "^8.3.0",
     "insomnia-oas-converter": "codeasashu/insomnia-oas-converter#fix-example",
-    "postman-to-openapi": "^2.0.0"
+    "postman-to-openapi": "^3.0.1"
   },
   "version": "1.0.0"
 }
